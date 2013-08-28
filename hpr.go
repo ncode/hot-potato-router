@@ -70,7 +70,7 @@ func main() {
 			log.Fatal(http.Serve(l, s))
 		}()
 	}
-	log.Fatal(http.Serve(listen(http_fd, cfg.Options["hpr"]["https_addr"]), s))
+	log.Fatal(http.Serve(listen(http_fd, cfg.Options["hpr"]["http_addr"]), s))
 }
 
 func listen(fd int, addr string) net.Listener {
@@ -90,7 +90,7 @@ func listen(fd int, addr string) net.Listener {
 func NewServer(probe time.Duration) (*Server, error) {
 	s := new(Server)
 	s.proxy = make(map[string]http.Handler)
-	go s.probe_backends(probe)
+	// go s.probe_backends(probe)
 	return s, nil
 }
 
