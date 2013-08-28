@@ -1,4 +1,4 @@
-hot-potato-router
+Hot Potato Router
 =================
 
 http reverse proxy made easy
