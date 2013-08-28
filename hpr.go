@@ -35,20 +35,31 @@ import (
 	"time"
 )
 
+type Server struct {
+	mu    sync.RWMutex
+	last  time.Time
+	proxy map[string]http.Handler
+}
+
+type Proxy struct {
+	Backend string
+	handler http.Handler
+}
+
 var (
 	cfg = hpr_utils.NewConfig()
 	rc  = redis.New(cfg.Options["redis"]["server_list"])
 )
 
 func main() {
-	flag.Parse()
-	s, err := NewServer(*ruleFile, *pollInterval)
+	probe_interval, _ := strconv.Atoi(cfg.Options["redis"]["probe_interval"])
+	s, err := NewServer(time.Duration(probe_interval) * time.Second)
 	if err != nil {
 		log.Fatal(err)
 	}
 	http_fd, _ := strconv.Atoi(cfg.Options["hpr"]["http_fd"])
 	https_fd, _ := strconv.Atoi(cfg.Options["hpr"]["https_fd"])
-	if https_fd >= 3 || *httpsAddr != "" {
+	if https_fd >= 3 || cfg.Options["hpr"]["https_addr"] != "" {
 		cert, err := tls.LoadX509KeyPair(cfg.Options["hpr"]["cert_file"], cfg.Options["hpr"]["key_file"])
 		if err != nil {
 			log.Fatal(err)
@@ -74,17 +85,6 @@ func listen(fd int, addr string) net.Listener {
 		log.Fatal(err)
 	}
 	return l
-}
-
-type Server struct {
-	mu    sync.RWMutex
-	last  time.Time
-	proxy map[string][]Proxy
-}
-
-type Proxy struct {
-	Backend string
-	handler http.Handler
 }
 
 func NewServer(probe time.Duration) (*Server, error) {
@@ -121,7 +121,6 @@ func (s *Server) handler(req *http.Request) http.Handler {
 func (s *Server) probe_backends(probe time.Duration) {
 	for {
 		s.mu.Lock()
-		s.last = mtime
 		s.mu.Unlock()
 		time.Sleep(probe)
 	}

@@ -5,7 +5,7 @@ hpr:
     https_fd:
     cert_file: 
     key_file:
-    probe_interval:
+    probe_interval: 50
 
 redis:
 	server_list: 127.0.0.1:6379
