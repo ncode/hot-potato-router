@@ -1,11 +1,11 @@
 hpr:
     http_addr: :80
     http_fd:
-    https_addr: 
+    https_addr:
     https_fd:
-    cert_file: 
+    cert_file:
     key_file:
     probe_interval: 50
 
 redis:
-	server_list: 127.0.0.1:6379
+    server_list: 127.0.0.1:6379
