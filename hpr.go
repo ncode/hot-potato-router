@@ -90,7 +90,7 @@ func listen(fd int, addr string) net.Listener {
 func NewServer(probe time.Duration) (*Server, error) {
 	s := new(Server)
 	s.proxy = make(map[string]http.Handler)
-	// go s.probe_backends(probe)
+	go s.probe_backends(probe)
 	return s, nil
 }
 
@@ -120,8 +120,8 @@ func (s *Server) handler(req *http.Request) http.Handler {
 
 func (s *Server) probe_backends(probe time.Duration) {
 	for {
-		s.mu.Lock()
-		s.mu.Unlock()
+		//s.mu.Lock()
+		//s.mu.Unlock()
 		time.Sleep(probe)
 	}
 }
