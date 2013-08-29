@@ -123,8 +123,8 @@ func (s *Server) handler(req *http.Request) http.Handler {
 
 func (s *Server) probe_backends(probe time.Duration) {
 	for {
-		//s.mu.Lock()
-		//s.mu.Unlock()
+		s.mu.Lock()
+		s.mu.Unlock()
 		time.Sleep(probe)
 	}
 }
