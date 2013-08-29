@@ -127,12 +127,12 @@ func (s *Server) Next(h string) http.Handler {
 
 func (s *Server) probe_backends(probe time.Duration) {
 	for {
+		time.Sleep(probe)
 		s.mu.Lock()
 		for key, value := range s.proxy {
 			hpr_utils.Log(fmt.Sprintf("Key: %s Value: %s", key, value))
 		}
 		s.mu.Unlock()
-		time.Sleep(probe)
 	}
 }
 
