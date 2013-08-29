@@ -22,7 +22,6 @@ import (
 	"crypto/tls"
 	hpr_http_server "github.com/ncode/hot-potato-router/http_server"
 	hpr_utils "github.com/ncode/hot-potato-router/utils"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -38,9 +37,8 @@ func main() {
 		probe_interval = 10
 	}
 	s, err := hpr_http_server.NewServer(time.Duration(probe_interval) * time.Second)
-	if err != nil {
-		log.Fatal(err)
-	}
+	hpr_utils.CheckPanic(err, "Unable to spawn")
+
 	http_fd, _ := strconv.Atoi(cfg.Options["hpr"]["http_fd"])
 	https_fd, _ := strconv.Atoi(cfg.Options["hpr"]["https_fd"])
 	if https_fd >= 3 || cfg.Options["hpr"]["https_addr"] != "" {
