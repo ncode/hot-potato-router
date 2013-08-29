@@ -109,8 +109,7 @@ func (s *Server) handler(req *http.Request) http.Handler {
 	return s.Next(h)
 }
 
-/* TODO: Implement at least one decent loadbalance algorithm
-Using n+1 to see it working*/
+/* TODO: Implement more balance algorithms */
 func (s *Server) Next(h string) http.Handler {
 	s.mu.Lock()
 	defer s.mu.Unlock()
