@@ -47,14 +47,16 @@ func xff(req *http.Request) string {
 }
 
 type Server struct {
-	mu    sync.RWMutex
-	last  time.Time
-	proxy map[string]http.Handler
+	mu      sync.RWMutex
+	last    time.Time
+	proxy   map[string][]Proxy
+	backend map[string]int
 }
 
 type Proxy struct {
-	Backend string
-	handler http.Handler
+	Connections int64
+	Backend     string
+	handler     http.Handler
 }
 
 func Listen(fd int, addr string) net.Listener {
@@ -73,7 +75,7 @@ func Listen(fd int, addr string) net.Listener {
 
 func NewServer(probe time.Duration) (*Server, error) {
 	s := new(Server)
-	s.proxy = make(map[string]http.Handler)
+	s.proxy = make(map[string][]Proxy)
 	go s.probe_backends(probe)
 	return s, nil
 }
@@ -98,10 +100,24 @@ func (s *Server) handler(req *http.Request) http.Handler {
 
 	_, ok := s.proxy[h]
 	if !ok {
-		v, _ := rc.Get(h)
-		s.proxy[h] = makeHandler(v)
+		f, _ := rc.Get(h)
+		if f == "" {
+			return nil
+		}
+		s.proxy[h] = append(s.proxy[h], Proxy{0, f, makeHandler(f)})
 	}
-	return s.proxy[h]
+	return s.Next(h)
+}
+
+func (s *Server) Next(h string) http.Handler {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.backend[h]++
+	total := len(s.proxy[h])
+	if s.backend[h] == total {
+		s.backend[h] = 0
+	}
+	return s.proxy[h][s.backend[h]].handler
 }
 
 func (s *Server) probe_backends(probe time.Duration) {
