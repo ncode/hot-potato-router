@@ -52,7 +52,10 @@ var (
 )
 
 func main() {
-	probe_interval, _ := strconv.Atoi(cfg.Options["redis"]["probe_interval"])
+	probe_interval, _ := strconv.Atoi(cfg.Options["hpr"]["probe_interval"])
+	if probe_interval == 0 {
+		probe_interval = 10
+	}
 	s, err := NewServer(time.Duration(probe_interval) * time.Second)
 	if err != nil {
 		log.Fatal(err)
@@ -90,7 +93,7 @@ func listen(fd int, addr string) net.Listener {
 func NewServer(probe time.Duration) (*Server, error) {
 	s := new(Server)
 	s.proxy = make(map[string]http.Handler)
-	// go s.probe_backends(probe)
+	go s.probe_backends(probe)
 	return s, nil
 }
 
