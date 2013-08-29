@@ -109,14 +109,16 @@ func (s *Server) handler(req *http.Request) http.Handler {
 	return s.Next(h)
 }
 
+/* TODO: Implement at least one decent loadbalance algorithm
+Using n+1 to see it working*/
 func (s *Server) Next(h string) http.Handler {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.backend[h]++
 	total := len(s.proxy[h])
 	if s.backend[h] == total {
 		s.backend[h] = 0
 	}
+	s.backend[h]++
 	return s.proxy[h][s.backend[h]].handler
 }
 
