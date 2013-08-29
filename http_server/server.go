@@ -21,8 +21,16 @@
 package http_server
 
 import (
+	"github.com/fiorix/go-redis/redis"
 	hpr_utils "github.com/ncode/hot-potato-router/utils"
+	"log"
+	"net"
 	"net/http"
+	"net/http/httputil"
+	"os"
+	"strings"
+	"sync"
+	"time"
 )
 
 var (
@@ -35,7 +43,7 @@ func xff(req *http.Request) string {
 	if len(remote_addr) == 0 {
 		return ""
 	}
-	return remote_addr
+	return remote_addr[0]
 }
 
 type Server struct {
