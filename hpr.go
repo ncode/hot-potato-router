@@ -20,17 +20,11 @@ package main
 
 import (
 	"crypto/tls"
-	"github.com/fiorix/go-redis/redis"
 	hpr_http_server "github.com/ncode/hot-potato-router/http_server"
 	hpr_utils "github.com/ncode/hot-potato-router/utils"
 	"log"
-	"net"
 	"net/http"
-	"net/http/httputil"
-	"os"
 	"strconv"
-	"strings"
-	"sync"
 	"time"
 )
 
@@ -51,14 +45,15 @@ func main() {
 	https_fd, _ := strconv.Atoi(cfg.Options["hpr"]["https_fd"])
 	if https_fd >= 3 || cfg.Options["hpr"]["https_addr"] != "" {
 		cert, err := tls.LoadX509KeyPair(cfg.Options["hpr"]["cert_file"], cfg.Options["hpr"]["key_file"])
-		if err != nil {
-			log.Fatal(err)
-		}
+		hpr_utils.CheckPanic(err, "Unable to load certificate")
+
 		c := &tls.Config{Certificates: []tls.Certificate{cert}}
 		l := tls.NewListener(hpr_http_server.Listen(https_fd, cfg.Options["hpr"]["https_addr"]), c)
 		go func() {
-			log.Fatal(http.Serve(l, s))
+			hpr_utils.CheckPanic(http.Serve(l, s), "Problem with https server")
 		}()
 	}
-	log.Fatal(http.Serve(hpr_http_server.Listen(http_fd, cfg.Options["hpr"]["http_addr"]), s))
+	hpr_utils.CheckPanic(
+		http.Serve(hpr_http_server.Listen(http_fd, cfg.Options["hpr"]["http_addr"]), s),
+		"Problem with http server")
 }
