@@ -83,8 +83,10 @@ func NewServer(probe time.Duration) (*Server, error) {
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h := s.handler(r); h != nil {
-		r.Header.Add("X-Forwarded-For‎", xff(r))
-		r.Header.Add("X-Real-IP", xff(r))
+		client := xff(r)
+		hpr_utils.Log(fmt.Sprintf("Request from: %s Url: %s", client, r.Host))
+		r.Header.Add("X-Forwarded-For‎", client)
+		r.Header.Add("X-Real-IP", client)
 		h.ServeHTTP(w, r)
 		return
 	}
@@ -119,6 +121,7 @@ func (s *Server) Next(h string) http.Handler {
 		s.backend[h] = 0
 	}
 	s.backend[h]++
+	hpr_utils.Log(fmt.Sprintf("Using backend: %s Url: %s", s.proxy[h][s.backend[h]].Backend, h))
 	return s.proxy[h][s.backend[h]].handler
 }
 
