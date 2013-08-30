@@ -77,6 +77,7 @@ func Listen(fd int, addr string) net.Listener {
 func NewServer(probe time.Duration) (*Server, error) {
 	s := new(Server)
 	s.proxy = make(map[string][]Proxy)
+	s.backend = make(map[string]int)
 	go s.probe_backends(probe)
 	return s, nil
 }
