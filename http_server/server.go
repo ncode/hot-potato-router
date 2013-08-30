@@ -117,11 +117,11 @@ func (s *Server) handler(req *http.Request) http.Handler {
 func (s *Server) Next(h string) http.Handler {
 	// s.mu.Lock()
 	// defer s.mu.Unlock()
+	s.backend[h]++
 	total := len(s.proxy[h])
 	if s.backend[h] == total {
 		s.backend[h] = 0
 	}
-	s.backend[h]++
 	hpr_utils.Log(fmt.Sprintf("Using backend: %s Url: %s", s.proxy[h][s.backend[h]].Backend, h))
 	return s.proxy[h][s.backend[h]].handler
 }
