@@ -95,8 +95,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handler(req *http.Request) http.Handler {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 	h := req.Host
 	if i := strings.Index(h, ":"); i >= 0 {
 		h = h[:i]
@@ -115,8 +115,8 @@ func (s *Server) handler(req *http.Request) http.Handler {
 
 /* TODO: Implement more balance algorithms */
 func (s *Server) Next(h string) http.Handler {
-	// s.mu.Lock()
-	// defer s.mu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.backend[h]++
 	total := len(s.proxy[h])
 	if s.backend[h] == total {
