@@ -25,7 +25,7 @@ import (
 )
 
 var (
-	_log, s_err = syslog.New(syslog.LOG_ERR, "cloudboss")
+	_log, s_err = syslog.New(syslog.LOG_ERR, "hpr")
 )
 
 func Check(err error, message string) {
