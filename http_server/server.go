@@ -95,8 +95,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handler(req *http.Request) http.Handler {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
 	h := req.Host
 	if i := strings.Index(h, ":"); i >= 0 {
 		h = h[:i]
@@ -104,11 +102,13 @@ func (s *Server) handler(req *http.Request) http.Handler {
 
 	_, ok := s.proxy[h]
 	if !ok {
+		s.mu.Lock()
 		f, _ := rc.Get(h)
 		if f == "" {
 			return nil
 		}
 		s.proxy[h] = append(s.proxy[h], Proxy{0, f, makeHandler(f)})
+		s.mu.Unlock()
 	}
 	return s.Next(h)
 }
