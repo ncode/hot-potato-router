@@ -119,7 +119,7 @@ func (s *Server) handler(req *http.Request) http.Handler {
 				continue
 			}
 
-			for r := 0; r >= count; r++ {
+			for r := 0; r <= count; r++ {
 				log.Println(r)
 				log.Println(count)
 				log.Println(url)
