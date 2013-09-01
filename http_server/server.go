@@ -29,6 +29,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -108,10 +109,18 @@ func (s *Server) handler(req *http.Request) http.Handler {
 			return nil
 		}
 		s.mu.Lock()
+		var url string
 		for _, be := range f {
-
-			log.Println(be)
-			s.proxy[h] = append(s.proxy[h], Proxy{0, be, makeHandler(be)})
+			count, err := strconv.Atoi(be)
+			if err == nil {
+				continue
+			} else {
+				url = be
+			}
+			for r := 0; r >= count; r++ {
+				log.Println(url)
+				s.proxy[h] = append(s.proxy[h], Proxy{0, url, makeHandler(url)})
+			}
 		}
 		s.mu.Unlock()
 	}
