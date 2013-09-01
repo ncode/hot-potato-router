@@ -103,9 +103,10 @@ func (s *Server) handler(req *http.Request) http.Handler {
 	_, ok := s.proxy[h]
 	if !ok {
 		f, _ := rc.ZRange(fmt.Sprint("hpr-backends::%s", h), 0, -1, true)
-		if len(f) == 0 {
+		log.Println(f[0])
+		/* if len(f) == 0 {
 			return nil
-		}
+		}*/
 		s.mu.Lock()
 		for _, be := range f {
 
