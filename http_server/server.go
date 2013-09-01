@@ -112,8 +112,10 @@ func (s *Server) handler(req *http.Request) http.Handler {
 		var url string
 		for _, be := range f {
 			count, err := strconv.Atoi(be)
+			log.Println(count)
 			if err != nil {
 				url = be
+				log.Println(be)
 				continue
 			}
 
