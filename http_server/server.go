@@ -102,8 +102,9 @@ func (s *Server) handler(req *http.Request) http.Handler {
 
 	_, ok := s.proxy[h]
 	if !ok {
-		f, _ := rc.ZRange(fmt.Sprint("hpr-backends::%s", h), 0, -1, true)
-		log.Println(f[0])
+		fmt.Println(fmt.Sprintf("hpr-backends::%s", h))
+		f, _ := rc.ZRange(fmt.Sprintf("hpr-backends::%s", h), 0, -1, true)
+		fmt.Println(f)
 		/* if len(f) == 0 {
 			return nil
 		}*/
