@@ -113,9 +113,10 @@ func (s *Server) handler(req *http.Request) http.Handler {
 		for _, be := range f {
 			count, err := strconv.Atoi(be)
 			if err != nil {
+				url = be
 				continue
 			}
-			url = be
+
 			for r := 0; r >= count; r++ {
 				log.Println(r)
 				log.Println(count)
