@@ -102,13 +102,14 @@ func (s *Server) handler(req *http.Request) http.Handler {
 
 	_, ok := s.proxy[h]
 	if !ok {
-		s.mu.Lock()
 		f, _ := rc.ZRange(fmt.Sprint("hpr-backends::%s", h), 0, -1, true)
 		if len(f) == 0 {
 			return nil
 		}
+		s.mu.Lock()
 		for _, be := range f {
-			fmt.Printf(be)
+
+			log.Println(be)
 			s.proxy[h] = append(s.proxy[h], Proxy{0, be, makeHandler(be)})
 		}
 		s.mu.Unlock()
