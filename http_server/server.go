@@ -118,6 +118,8 @@ func (s *Server) handler(req *http.Request) http.Handler {
 				url = be
 			}
 			for r := 0; r >= count; r++ {
+				log.Println(r)
+				log.Println(count)
 				log.Println(url)
 				s.proxy[h] = append(s.proxy[h], Proxy{0, url, makeHandler(url)})
 			}
