@@ -104,10 +104,9 @@ func (s *Server) handler(req *http.Request) http.Handler {
 	if !ok {
 		fmt.Println(fmt.Sprintf("hpr-backends::%s", h))
 		f, _ := rc.ZRange(fmt.Sprintf("hpr-backends::%s", h), 0, -1, true)
-		fmt.Println(f)
-		/* if len(f) == 0 {
+		if len(f) == 0 {
 			return nil
-		}*/
+		}
 		s.mu.Lock()
 		for _, be := range f {
 
