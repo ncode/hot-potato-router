@@ -103,30 +103,26 @@ func (s *Server) handler(req *http.Request) http.Handler {
 
 	_, ok := s.proxy[h]
 	if !ok {
-		fmt.Println(fmt.Sprintf("hpr-backends::%s", h))
 		f, _ := rc.ZRange(fmt.Sprintf("hpr-backends::%s", h), 0, -1, true)
 		if len(f) == 0 {
 			return nil
 		}
-		s.mu.Lock()
+
 		var url string
 		for _, be := range f {
 			count, err := strconv.Atoi(be)
-			log.Println(count)
 			if err != nil {
 				url = be
-				log.Println(be)
 				continue
 			}
 
 			for r := 0; r <= count; r++ {
-				log.Println(r)
-				log.Println(count)
-				log.Println(url)
+				s.mu.Lock()
 				s.proxy[h] = append(s.proxy[h], Proxy{0, url, makeHandler(url)})
+				s.mu.Unlock()
 			}
 		}
-		s.mu.Unlock()
+
 	}
 	return s.Next(h)
 }
