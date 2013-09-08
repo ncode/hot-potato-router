@@ -1,0 +1,13 @@
+Source: hot-potato-router
+Section: utils
+Priority: extra
+Maintainer: Rodrigo Vaz <rodrigo.vaz@gmail.com>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.4
+Homepage: http://github.com/ncode/hot-potato-router
+
+Package: hot-potato-router
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Application load balancer
+ Distribute requests over a list of backends
