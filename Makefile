@@ -1,10 +1,7 @@
 all: build 
 
 build: 
-	mkdir -p $(GOPATH)
-	go get -v github.com/ncode/hot-potato-router/...
-	go build -v ./...
-	go build -o $(GOPATH)/bin/hot-potato-router .
+	GOPATH=$(GOPATH) go get -v github.com/ncode/hot-potato-router/...
 	
 install:
 	mkdir -p $(DESTDIR)/usr/bin/
