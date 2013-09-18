@@ -24,6 +24,7 @@ import (
 	"github.com/fiorix/go-redis/redis"
 	hpr_utils "github.com/ncode/hot-potato-router/utils"
 	"strconv"
+	"strings"
 )
 
 var (
@@ -68,6 +69,7 @@ Options:
 	if arguments["show"] == true {
 		bes, err := rc.ZRange(fmt.Sprintf("hpr-backends::%s", arguments["<vhost>"]), 0, -1, true)
 		hpr_utils.CheckPanic(err, "Unable to write on hpr database")
+		fmt.Printf(":: vhost [ %s ]\n", arguments["<vhost>"])
 		var url string
 		for _, be := range bes {
 			count, err := strconv.Atoi(be)
@@ -75,7 +77,7 @@ Options:
 				url = be
 				continue
 			}
-			fmt.Printf("backend %s weight %s", url, count)
+			fmt.Printf("-- backend %s weight=%d\n", url, count)
 		}
 		return
 	}
@@ -84,7 +86,7 @@ Options:
 		keys, err := rc.Keys("hpr-backends::*")
 		hpr_utils.CheckPanic(err, "Unable to write on hpr database")
 		for _, k := range keys {
-			fmt.Printf("vhost %s", k)
+			fmt.Printf(":: vhost [ %s ]\n", strings.TrimLeft(k, "hpr-backends::"))
 		}
 		return
 	}
