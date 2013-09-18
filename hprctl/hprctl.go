@@ -60,11 +60,11 @@ Options:
 		return
 	}
 
-	/* if arguments["del"] == true {
+	if arguments["del"] == true {
 		_, err := rc.ZRem(fmt.Sprintf("hpr-backends::%s", arguments["<vhost>"]), arguments["--weight"], arguments["<backend_ip:port>"])
 		hpr_utils.CheckPanic(err, "Unable to write on hpr database")
 		return
-	} */
+	}
 
 	if arguments["show"] == true {
 		bes, err := rc.ZRange(fmt.Sprintf("hpr-backends::%s", arguments["<vhost>"]), 0, -1, true)
