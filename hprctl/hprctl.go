@@ -21,12 +21,14 @@ package main
 import (
 	"fmt"
 	docopt "github.com/docopt/docopt.go"
-	//	"github.com/fiorix/go-redis/redis"
+	"github.com/fiorix/go-redis/redis"
 	hpr_utils "github.com/ncode/hot-potato-router/utils"
+	"strconv"
 )
 
 var (
 	cfg = hpr_utils.NewConfig()
+	rc  = redis.New(cfg.Options["redis"]["server_list"])
 )
 
 func main() {
@@ -42,7 +44,7 @@ Args:
   add           add a new vhost and backend
   dell          del a vhost and a backend
   show          show all backends from a given vhost
-  list          list all backends and vhosts
+  list          list all vhosts
 
 Options:
   -h --help     Show this screen.
@@ -51,5 +53,39 @@ Options:
 `
 
 	arguments, _ := docopt.Parse(usage, nil, true, "Hot Potato Router 0.3.0", false)
-	fmt.Println(arguments)
+	if arguments["add"] == true {
+		_, err := rc.ZAdd(fmt.Sprintf("hpr-backends::%s", arguments["<vhost>"]), arguments["--weight"], arguments["<backend_ip:port>"])
+		hpr_utils.CheckPanic(err, "Unable to write on hpr database")
+		return
+	}
+
+	/* if arguments["del"] == true {
+		_, err := rc.ZRem(fmt.Sprintf("hpr-backends::%s", arguments["<vhost>"]), arguments["--weight"], arguments["<backend_ip:port>"])
+		hpr_utils.CheckPanic(err, "Unable to write on hpr database")
+		return
+	} */
+
+	if arguments["show"] == true {
+		bes, err := rc.ZRange(fmt.Sprintf("hpr-backends::%s", arguments["<vhost>"]), 0, -1, true)
+		hpr_utils.CheckPanic(err, "Unable to write on hpr database")
+		var url string
+		for _, be := range bes {
+			count, err := strconv.Atoi(be)
+			if err != nil {
+				url = be
+				continue
+			}
+			fmt.Printf("backend %s wight %s", url, count)
+		}
+		return
+	}
+
+	if arguments["list"] == true {
+		keys, err := rc.Keys("hpr-backends::*")
+		hpr_utils.CheckPanic(err, "Unable to write on hpr database")
+		for _, k := range keys {
+			fmt.Printf("vhost %s", k)
+		}
+		return
+	}
 }
