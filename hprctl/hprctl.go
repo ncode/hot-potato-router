@@ -75,7 +75,7 @@ Options:
 				url = be
 				continue
 			}
-			fmt.Printf("backend %s wight %s", url, count)
+			fmt.Printf("backend %s weight %s", url, count)
 		}
 		return
 	}
