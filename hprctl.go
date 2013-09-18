@@ -35,6 +35,6 @@ Options:
   --weight=<n>  Weight in wrr [default: 1].
   --drifting    Drifting mine.`
 
-	arguments, _ := docopt.Parse(usage, nil, true, "Naval Fate 2.0", false)
+	arguments, _ := docopt.Parse(usage, nil, true, "Hot Potato Router 0.3.0", false)
 	fmt.Println(arguments)
 }
