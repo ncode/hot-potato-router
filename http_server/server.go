@@ -154,10 +154,8 @@ func (s *Server) probe_backends(probe time.Duration) {
 	for {
 		time.Sleep(probe)
 		// s.mu.Lock()
-		for vhost, backends := range s.proxy {
-			for backend := range backends {
-				hpr_utils.Log(fmt.Sprintf("vhost: %s backends: %s", vhost, backend))
-			}
+		for vhost, backend := range s.proxy {
+			hpr_utils.Log(fmt.Sprintf("vhost: %s backends: %s", vhost, backend.Backend))
 			//client.Get(s.proxy[k][s.backend[h]])
 		}
 		// s.mu.Unlock()
