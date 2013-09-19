@@ -160,7 +160,7 @@ func (s *Server) probe_backends(probe time.Duration) {
 	for {
 		time.Sleep(probe)
 
-		// s.mu.Lock()
+		s.mu.Lock()
 		for vhost, backends := range s.proxy {
 			// err := s.populate_proxies(vhost)
 			fmt.Printf("%v", backends)
@@ -186,7 +186,7 @@ func (s *Server) probe_backends(probe time.Duration) {
 			}
 
 		}
-		// s.mu.Unlock()
+		s.mu.Unlock()
 	}
 }
 
