@@ -118,7 +118,8 @@ func (s *Server) handler(req *http.Request) http.Handler {
 
 			for r := 0; r <= count; r++ {
 				s.mu.Lock()
-				s.proxy[h] = append(s.proxy[h], Proxy{0, url, makeHandler(url)})
+				s.proxy[h] = append(s.proxy[h],
+					Proxy{0, fmt.Sprintf("http://%s", url), makeHandler(url)})
 				s.mu.Unlock()
 			}
 		}
@@ -136,7 +137,8 @@ func (s *Server) Next(h string) http.Handler {
 	if s.backend[h] == total {
 		s.backend[h] = 0
 	}
-	hpr_utils.Log(fmt.Sprintf("Using backend: %s Url: %s", s.proxy[h][s.backend[h]].Backend, h))
+	hpr_utils.Log(fmt.Sprintf(
+		"Using backend: %s Url: %s", s.proxy[h][s.backend[h]].Backend, h))
 	return s.proxy[h][s.backend[h]].handler
 }
 
@@ -156,7 +158,8 @@ func (s *Server) probe_backends(probe time.Duration) {
 		time.Sleep(probe)
 		// s.mu.Lock()
 		for vhost, _ := range s.proxy {
-			hpr_utils.Log(fmt.Sprintf("vhost: %s backends: %s", vhost, s.proxy[vhost][s.backend[vhost]].Backend))
+			hpr_utils.Log(fmt.Sprintf(
+				"vhost: %s backends: %s", vhost, s.proxy[vhost][s.backend[vhost]].Backend))
 			_, err := client.Get(s.proxy[vhost][s.backend[vhost]].Backend)
 			if err != nil {
 				hpr_utils.Check(err, "Dead backend")
