@@ -141,22 +141,22 @@ func (s *Server) Next(h string) http.Handler {
 }
 
 func dialTimeout(network, addr string) (net.Conn, error) {
+	timeout := time.Duration(2 * time.Second)
 	return net.DialTimeout(network, addr, timeout)
 }
 
 func (s *Server) probe_backends(probe time.Duration) {
-	timeout := time.Duration(2 * time.Second)
-	transport := http.Transport{Dial: dialTimeout}
+	/*transport := http.Transport{Dial: dialTimeout}
 	client := &http.Client{
 		Transport: &transport,
-	}
+	}*/
 
 	for {
 		time.Sleep(probe)
 		// s.mu.Lock()
 		for vhost, backends := range s.proxy {
 			for backend := range backends {
-				hpr_utils.Log(fmt.Sprintf("vhost: %s backend: %s", vhost, backend.Backend))
+				hpr_utils.Log(fmt.Sprintf("vhost: %s backends: %s", vhost, backend))
 			}
 			//client.Get(s.proxy[k][s.backend[h]])
 		}
