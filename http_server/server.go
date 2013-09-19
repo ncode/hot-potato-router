@@ -176,6 +176,7 @@ func (s *Server) probe_backends(probe time.Duration) {
 					hpr_utils.Log(fmt.Sprintf("Removing dead backend: %s", s.proxy[vhost][backend].Backend))
 					s.proxy[vhost] = s.proxy[vhost][:backend+copy(s.proxy[vhost][backend:], s.proxy[vhost][backend+1:])]
 					removed++
+					continue
 				}
 
 				_, err := client.Get(s.proxy[vhost][backend].Backend)
