@@ -163,6 +163,8 @@ func (s *Server) probe_backends(probe time.Duration) {
 			_, err := client.Get(s.proxy[vhost][s.backend[vhost]].Backend)
 			if err != nil {
 				hpr_utils.Check(err, "Dead backend")
+			} else {
+				hpr_utils.Log(fmt.Sprintf("Alive: %s", s.proxy[vhost][s.backend[vhost]].Backend))
 			}
 
 		}
