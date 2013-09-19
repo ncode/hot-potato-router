@@ -146,10 +146,10 @@ func dialTimeout(network, addr string) (net.Conn, error) {
 }
 
 func (s *Server) probe_backends(probe time.Duration) {
-	/*transport := http.Transport{Dial: dialTimeout}
+	transport := http.Transport{Dial: dialTimeout}
 	client := &http.Client{
 		Transport: &transport,
-	}*/
+	}
 
 	for {
 		time.Sleep(probe)
