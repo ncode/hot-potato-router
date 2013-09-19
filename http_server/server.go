@@ -102,10 +102,12 @@ func (s *Server) handler(req *http.Request) http.Handler {
 		h = h[:i]
 	}
 
+	s.mu.RLock()
 	_, ok := s.proxy[h]
 	if !ok {
 		s.populate_proxies(h)
 	}
+	s.mu.RUnlock()
 	return s.Next(h)
 }
 
@@ -124,11 +126,9 @@ func (s *Server) populate_proxies(host string) (err error) {
 		}
 
 		for r := 0; r <= count; r++ {
-			s.mu.Lock()
 			b := true
 			s.proxy[host] = append(s.proxy[host],
 				Proxy{&b, fmt.Sprintf("http://%s", url), makeHandler(url)})
-			s.mu.Unlock()
 		}
 	}
 	return
