@@ -159,7 +159,6 @@ func (s *Server) probe_backends(probe time.Duration) {
 
 	for {
 		time.Sleep(probe)
-
 		s.mu.Lock()
 		for vhost, backends := range s.proxy {
 			// err := s.populate_proxies(vhost)
