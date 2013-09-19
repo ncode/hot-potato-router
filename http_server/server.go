@@ -51,15 +51,15 @@ func xff(req *http.Request) string {
 
 type Server struct {
 	mu      sync.RWMutex
-	last    time.Time
 	proxy   map[string][]Proxy
 	backend map[string]int
 }
 
 type Proxy struct {
-	Connections int64
-	Backend     string
-	handler     http.Handler
+	Alive *bool
+	//	last    time.Time
+	Backend string
+	handler http.Handler
 }
 
 func Listen(fd int, addr string) net.Listener {
@@ -104,26 +104,7 @@ func (s *Server) handler(req *http.Request) http.Handler {
 
 	_, ok := s.proxy[h]
 	if !ok {
-		f, _ := rc.ZRange(fmt.Sprintf("hpr-backends::%s", h), 0, -1, true)
-		if len(f) == 0 {
-			return nil
-		}
-
-		var url string
-		for _, be := range f {
-			count, err := strconv.Atoi(be)
-			if err != nil {
-				url = be
-				continue
-			}
-
-			for r := 0; r <= count; r++ {
-				s.mu.Lock()
-				s.proxy[h] = append(s.proxy[h],
-					Proxy{0, fmt.Sprintf("http://%s", url), makeHandler(url)})
-				s.mu.Unlock()
-			}
-		}
+		s.populate_proxies(h)
 	}
 	return s.Next(h)
 }
@@ -144,8 +125,9 @@ func (s *Server) populate_proxies(host string) (err error) {
 
 		for r := 0; r <= count; r++ {
 			s.mu.Lock()
+			b := true
 			s.proxy[host] = append(s.proxy[host],
-				Proxy{0, fmt.Sprintf("http://%s", url), makeHandler(url)})
+				Proxy{&b, fmt.Sprintf("http://%s", url), makeHandler(url)})
 			s.mu.Unlock()
 		}
 	}
@@ -178,21 +160,22 @@ func (s *Server) probe_backends(probe time.Duration) {
 
 		// s.mu.Lock()
 		for vhost, backends := range s.proxy {
-			err := s.populate_proxies(vhost)
+			// err := s.populate_proxies(vhost)
 			fmt.Printf("%v", backends)
 			fmt.Println(len(backends))
 			for backend := range backends {
 				fmt.Println(backend)
 				hpr_utils.Log(fmt.Sprintf(
 					"vhost: %s backends: %s", vhost, s.proxy[vhost][backend].Backend))
-				if err != nil {
+				/* if err != nil {
 					hpr_utils.Log(fmt.Sprintf("Removing backend %s", s.proxy[vhost][backend].Backend))
-				}
+				} */
 				_, err := client.Get(s.proxy[vhost][backend].Backend)
 				if err != nil {
 					hpr_utils.Check(err, "Dead backend")
 				} else {
 					hpr_utils.Log(fmt.Sprintf("Alive: %s", s.proxy[vhost][backend].Backend))
+
 				}
 			}
 
