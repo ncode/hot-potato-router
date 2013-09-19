@@ -156,7 +156,11 @@ func (s *Server) probe_backends(probe time.Duration) {
 		// s.mu.Lock()
 		for vhost, _ := range s.proxy {
 			hpr_utils.Log(fmt.Sprintf("vhost: %s backends: %s", vhost, s.proxy[vhost][s.backend[vhost]].Backend))
-			//client.Get(s.proxy[k][s.backend[h]])
+			_, err := client.Get(s.proxy[vhost][s.backend[vhost]].Backend)
+			if err != nil {
+				hpr_utils.Check(err, "Dead backend")
+			}
+
 		}
 		// s.mu.Unlock()
 	}
