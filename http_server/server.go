@@ -140,12 +140,25 @@ func (s *Server) Next(h string) http.Handler {
 	return s.proxy[h][s.backend[h]].handler
 }
 
+func dialTimeout(network, addr string) (net.Conn, error) {
+	return net.DialTimeout(network, addr, timeout)
+}
+
 func (s *Server) probe_backends(probe time.Duration) {
+	timeout := time.Duration(2 * time.Second)
+	transport := http.Transport{Dial: dialTimeout}
+	client := &http.Client{
+		Transport: &transport,
+	}
+
 	for {
 		time.Sleep(probe)
 		// s.mu.Lock()
-		for key, value := range s.proxy {
-			hpr_utils.Log(fmt.Sprintf("Key: %s Value: %s", key, value))
+		for vhost, backends := range s.proxy {
+			for backend := range backends {
+				hpr_utils.Log(fmt.Sprintf("vhost: %s backend: %s", vhost, backend.Backend))
+			}
+			//client.Get(s.proxy[k][s.backend[h]])
 		}
 		// s.mu.Unlock()
 	}
