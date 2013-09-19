@@ -49,22 +49,19 @@ Args:
 
 Options:
   -h --help     Show this screen.
-  --version     Show version.`
-
-	/*  --weight=<n>  Weight in wrr [default: 1].
-	`*/
+  --version     Show version.
+  --weight=<n>  Weight in wrr [default: 1].
+`
 
 	arguments, _ := docopt.Parse(usage, nil, true, "Hot Potato Router 0.3.0", false)
 	if arguments["add"] == true {
-		// _, err := rc.ZAdd(fmt.Sprintf("hpr-backends::%s", arguments["<vhost>"]), arguments["--weight"], arguments["<backend_ip:port>"])
-		_, err := rc.ZAdd(fmt.Sprintf("hpr-backends::%s", arguments["<vhost>"]), 1, arguments["<backend_ip:port>"])
+		_, err := rc.ZAdd(fmt.Sprintf("hpr-backends::%s", arguments["<vhost>"]), arguments["--weight"], arguments["<backend_ip:port>"])
 		hpr_utils.CheckPanic(err, "Unable to write on hpr database")
 		return
 	}
 
 	if arguments["del"] == true {
-		// _, err := rc.ZRem(fmt.Sprintf("hpr-backends::%s", arguments["<vhost>"]), arguments["--weight"], arguments["<backend_ip:port>"])
-		_, err := rc.ZRem(fmt.Sprintf("hpr-backends::%s", arguments["<vhost>"]), 1, arguments["<backend_ip:port>"])
+		_, err := rc.ZRem(fmt.Sprintf("hpr-backends::%s", arguments["<vhost>"]), arguments["--weight"], arguments["<backend_ip:port>"])
 		hpr_utils.CheckPanic(err, "Unable to write on hpr database")
 		return
 	}
