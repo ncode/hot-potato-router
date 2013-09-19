@@ -33,12 +33,12 @@ var (
 )
 
 func main() {
-	usage := `Hot Potato Router Control.
+	usage := `Hot Potato Router Control
 
 Usage:
   hprctl add <vhost> <backend_ip:port> [--weight=<n>]
   hprctl del <vhost> <backend_ip:port> [--weight=<n>]
-  hprctl show <vhost> 
+  hprctl show <vhost>
   hprctl list
 
 Args:
