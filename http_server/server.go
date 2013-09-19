@@ -159,26 +159,27 @@ func (s *Server) probe_backends(probe time.Duration) {
 
 	for {
 		time.Sleep(probe)
-
 		s.mu.Lock()
 		for vhost, backends := range s.proxy {
 			// err := s.populate_proxies(vhost)
 			fmt.Printf("%v", backends)
 			fmt.Println(len(backends))
 			is_dead := make(map[string]bool)
-			for backend := range backends {
+			for backend := 0; backend >= len(s.proxy[vhost]); backend++ {
 				fmt.Println(backend)
 				hpr_utils.Log(fmt.Sprintf(
 					"vhost: %s backends: %s", vhost, s.proxy[vhost][backend].Backend))
 				if is_dead[s.proxy[vhost][backend].Backend] {
 					hpr_utils.Log(fmt.Sprintf("Removing dead backend: %s", s.proxy[vhost][backend].Backend))
 					s.proxy[vhost] = s.proxy[vhost][:backend+copy(s.proxy[vhost][backend:], s.proxy[vhost][backend+1:])]
+					backend--
 				}
 
 				_, err := client.Get(s.proxy[vhost][backend].Backend)
 				if err != nil {
 					hpr_utils.Log(fmt.Sprintf("Removing dead backend: %s", s.proxy[vhost][backend].Backend))
 					s.proxy[vhost] = s.proxy[vhost][:backend+copy(s.proxy[vhost][backend:], s.proxy[vhost][backend+1:])]
+					backend--
 					is_dead[s.proxy[vhost][backend].Backend] = true
 				} else {
 					hpr_utils.Log(fmt.Sprintf("Alive: %s", s.proxy[vhost][backend].Backend))
