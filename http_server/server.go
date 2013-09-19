@@ -145,6 +145,7 @@ func dialTimeout(network, addr string) (net.Conn, error) {
 	return net.DialTimeout(network, addr, timeout)
 }
 
+/* TODO: Implement a decent probe method */
 func (s *Server) probe_backends(probe time.Duration) {
 	transport := http.Transport{Dial: dialTimeout}
 	client := &http.Client{
