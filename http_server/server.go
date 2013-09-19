@@ -56,7 +56,6 @@ type Server struct {
 }
 
 type Proxy struct {
-	Alive *bool
 	//	last    time.Time
 	Backend string
 	handler http.Handler
@@ -97,22 +96,26 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handler(req *http.Request) http.Handler {
-	h := req.Host
-	if i := strings.Index(h, ":"); i >= 0 {
-		h = h[:i]
+	vhost := req.Host
+	if i := strings.Index(vhost, ":"); i >= 0 {
+		vhost = vhost[:i]
 	}
 
 	s.mu.RLock()
-	_, ok := s.proxy[h]
+	_, ok := s.proxy[vhost]
 	if !ok {
-		s.populate_proxies(h)
+		err := s.populate_proxies(vhost)
+		if err != nil {
+			hpr_utils.Log(fmt.Sprintf("%s for vhost %s", err, vhost))
+			return nil
+		}
 	}
 	s.mu.RUnlock()
-	return s.Next(h)
+	return s.Next(vhost)
 }
 
-func (s *Server) populate_proxies(host string) (err error) {
-	f, _ := rc.ZRange(fmt.Sprintf("hpr-backends::%s", host), 0, -1, true)
+func (s *Server) populate_proxies(vhost string) (err error) {
+	f, _ := rc.ZRange(fmt.Sprintf("hpr-backends::%s", vhost), 0, -1, true)
 	if len(f) == 0 {
 		return errors.New("Backend list is empty")
 	}
@@ -125,27 +128,26 @@ func (s *Server) populate_proxies(host string) (err error) {
 			continue
 		}
 
-		for r := 0; r <= count; r++ {
-			b := true
-			s.proxy[host] = append(s.proxy[host],
-				Proxy{&b, fmt.Sprintf("http://%s", url), makeHandler(url)})
+		for r := 1; r <= count; r++ {
+			s.proxy[vhost] = append(s.proxy[vhost],
+				Proxy{fmt.Sprintf("http://%s", url), makeHandler(url)})
 		}
 	}
 	return
 }
 
 /* TODO: Implement more balance algorithms */
-func (s *Server) Next(h string) http.Handler {
+func (s *Server) Next(vhost string) http.Handler {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.backend[h]++
-	total := len(s.proxy[h])
-	if s.backend[h] == total {
-		s.backend[h] = 0
+	s.backend[vhost]++
+	total := len(s.proxy[vhost])
+	if s.backend[vhost] >= total {
+		s.backend[vhost] = 0
 	}
 	hpr_utils.Log(fmt.Sprintf(
-		"Using backend: %s Url: %s", s.proxy[h][s.backend[h]].Backend, h))
-	return s.proxy[h][s.backend[h]].handler
+		"Using backend: %s Url: %s", s.proxy[vhost][s.backend[vhost]].Backend, vhost))
+	return s.proxy[vhost][s.backend[vhost]].handler
 }
 
 /* TODO: Implement more probes */
@@ -163,19 +165,23 @@ func (s *Server) probe_backends(probe time.Duration) {
 			// err := s.populate_proxies(vhost)
 			fmt.Printf("%v", backends)
 			fmt.Println(len(backends))
+			is_dead := make(map[string]bool)
 			for backend := range backends {
 				fmt.Println(backend)
 				hpr_utils.Log(fmt.Sprintf(
 					"vhost: %s backends: %s", vhost, s.proxy[vhost][backend].Backend))
-				/* if err != nil {
-					hpr_utils.Log(fmt.Sprintf("Removing backend %s", s.proxy[vhost][backend].Backend))
-				} */
+				if is_dead[s.proxy[vhost][backend].Backend] {
+					hpr_utils.Log(fmt.Sprintf("Removing dead backend: %s", s.proxy[vhost][backend].Backend))
+					s.proxy[vhost] = s.proxy[vhost][:backend+copy(s.proxy[vhost][backend:], s.proxy[vhost][backend+1:])]
+				}
+
 				_, err := client.Get(s.proxy[vhost][backend].Backend)
 				if err != nil {
-					hpr_utils.Log(fmt.Sprintf("Dead backend: %s", err))
+					hpr_utils.Log(fmt.Sprintf("Removing dead backend: %s", s.proxy[vhost][backend].Backend))
+					s.proxy[vhost] = s.proxy[vhost][:backend+copy(s.proxy[vhost][backend:], s.proxy[vhost][backend+1:])]
+					is_dead[s.proxy[vhost][backend].Backend] = true
 				} else {
 					hpr_utils.Log(fmt.Sprintf("Alive: %s", s.proxy[vhost][backend].Backend))
-
 				}
 			}
 
