@@ -147,7 +147,7 @@ func dialTimeout(network, addr string) (net.Conn, error) {
 	return net.DialTimeout(network, addr, timeout)
 }
 
-/* TODO: Implement a decent probe method */
+/* TODO: Implement more probes */
 func (s *Server) probe_backends(probe time.Duration) {
 	transport := http.Transport{Dial: dialTimeout}
 	client := &http.Client{
@@ -157,14 +157,16 @@ func (s *Server) probe_backends(probe time.Duration) {
 	for {
 		time.Sleep(probe)
 		// s.mu.Lock()
-		for vhost, _ := range s.proxy {
-			hpr_utils.Log(fmt.Sprintf(
-				"vhost: %s backends: %s", vhost, s.proxy[vhost][s.backend[vhost]].Backend))
-			_, err := client.Get(s.proxy[vhost][s.backend[vhost]].Backend)
-			if err != nil {
-				hpr_utils.Check(err, "Dead backend")
-			} else {
-				hpr_utils.Log(fmt.Sprintf("Alive: %s", s.proxy[vhost][s.backend[vhost]].Backend))
+		for vhost, backends := range s.proxy {
+			for backend := range backends {
+				hpr_utils.Log(fmt.Sprintf(
+					"vhost: %s backends: %s", vhost, s.proxy[vhost][backend].Backend))
+				_, err := client.Get(s.proxy[vhost][backend].Backend)
+				if err != nil {
+					hpr_utils.Check(err, "Dead backend")
+				} else {
+					hpr_utils.Log(fmt.Sprintf("Alive: %s", s.proxy[vhost][backend].Backend))
+				}
 			}
 
 		}
