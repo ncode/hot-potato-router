@@ -21,6 +21,7 @@
 package http_server
 
 import (
+	"errors"
 	"fmt"
 	"github.com/fiorix/go-redis/redis"
 	hpr_utils "github.com/ncode/hot-potato-router/utils"
@@ -123,9 +124,32 @@ func (s *Server) handler(req *http.Request) http.Handler {
 				s.mu.Unlock()
 			}
 		}
-
 	}
 	return s.Next(h)
+}
+
+func (s *Server) populate_proxies(host string) (err error) {
+	f, _ := rc.ZRange(fmt.Sprintf("hpr-backends::%s", host), 0, -1, true)
+	if len(f) == 0 {
+		return errors.New("Backend list is empty")
+	}
+
+	var url string
+	for _, be := range f {
+		count, err := strconv.Atoi(be)
+		if err != nil {
+			url = be
+			continue
+		}
+
+		for r := 0; r <= count; r++ {
+			s.mu.Lock()
+			s.proxy[host] = append(s.proxy[host],
+				Proxy{0, fmt.Sprintf("http://%s", url), makeHandler(url)})
+			s.mu.Unlock()
+		}
+	}
+	return
 }
 
 /* TODO: Implement more balance algorithms */
@@ -142,11 +166,6 @@ func (s *Server) Next(h string) http.Handler {
 	return s.proxy[h][s.backend[h]].handler
 }
 
-func dialTimeout(network, addr string) (net.Conn, error) {
-	timeout := time.Duration(2 * time.Second)
-	return net.DialTimeout(network, addr, timeout)
-}
-
 /* TODO: Implement more probes */
 func (s *Server) probe_backends(probe time.Duration) {
 	transport := http.Transport{Dial: dialTimeout}
@@ -156,14 +175,19 @@ func (s *Server) probe_backends(probe time.Duration) {
 
 	for {
 		time.Sleep(probe)
+
 		// s.mu.Lock()
 		for vhost, backends := range s.proxy {
+			err := s.populate_proxies(vhost)
 			fmt.Printf("%v", backends)
 			fmt.Println(len(backends))
 			for backend := range backends {
 				fmt.Println(backend)
 				hpr_utils.Log(fmt.Sprintf(
 					"vhost: %s backends: %s", vhost, s.proxy[vhost][backend].Backend))
+				if err != nil {
+					hpr_utils.Log(fmt.Sprintf("Removing backend %s", s.proxy[vhost][backend].Backend))
+				}
 				_, err := client.Get(s.proxy[vhost][backend].Backend)
 				if err != nil {
 					hpr_utils.Check(err, "Dead backend")
@@ -175,6 +199,11 @@ func (s *Server) probe_backends(probe time.Duration) {
 		}
 		// s.mu.Unlock()
 	}
+}
+
+func dialTimeout(network, addr string) (net.Conn, error) {
+	timeout := time.Duration(2 * time.Second)
+	return net.DialTimeout(network, addr, timeout)
 }
 
 func makeHandler(f string) http.Handler {
