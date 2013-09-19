@@ -159,6 +159,7 @@ func (s *Server) probe_backends(probe time.Duration) {
 		// s.mu.Lock()
 		for vhost, backends := range s.proxy {
 			fmt.Printf("%v", backends)
+			fmt.Println(len(backends))
 			for backend := range backends {
 				fmt.Println(backend)
 				hpr_utils.Log(fmt.Sprintf(
