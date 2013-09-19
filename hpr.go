@@ -32,6 +32,7 @@ var (
 )
 
 func main() {
+	hpr_utils.Log("Starting Hot Potato Router...")
 	probe_interval, _ := strconv.Atoi(cfg.Options["hpr"]["probe_interval"])
 	if probe_interval == 0 {
 		probe_interval = 10
