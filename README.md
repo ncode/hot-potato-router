@@ -30,9 +30,6 @@ HPR receives a connection from interwebs look for the destination on Redis and p
       --version     Show version.
       --weight=<n>  Weight in wrr [default: 1].
 
-      $ hprctl add <vhost> <backend_ip:port> [--weight=<n>]
-
-
     $ hprctl add hpr.martinez.io 127.0.0.1:8080
     $ hprctl add hpr.martinez.io 127.0.0.1:8081
     $ hprctl show hpr.martinez.io
