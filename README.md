@@ -10,35 +10,35 @@ HPR receives a connection from interwebs look for the destination on Redis and p
 ## Usage:
 ###  hprctl
 
-    $ hprctl -h
-    Hot Potato Router Control
+        $ hprctl -h
+        Hot Potato Router Control
 
-    Usage:
-      hprctl add <vhost> <backend_ip:port> [--weight=<n>]
-      hprctl del <vhost> <backend_ip:port> [--weight=<n>]
-      hprctl show <vhost>
-      hprctl list
+        Usage:
+          hprctl add <vhost> <backend_ip:port> [--weight=<n>]
+          hprctl del <vhost> <backend_ip:port> [--weight=<n>]
+          hprctl show <vhost>
+          hprctl list
 
-    Args:
-      add           add a new vhost and backend
-      dell          del a vhost and a backend
-      show          show all backends from a given vhost
-      list          list all vhosts
+        Args:
+          add           add a new vhost and backend
+          dell          del a vhost and a backend
+          show          show all backends from a given vhost
+          list          list all vhosts
 
-    Options:
-      -h --help     Show this screen.
-      --version     Show version.
-      --weight=<n>  Weight in wrr [default: 1].
+        Options:
+          -h --help     Show this screen.
+          --version     Show version.
+          --weight=<n>  Weight in wrr [default: 1].
 
-    $ hprctl add hpr.martinez.io 127.0.0.1:8080
-    $ hprctl add hpr.martinez.io 127.0.0.1:8081
-    $ hprctl show hpr.martinez.io
-    :: vhost [ hpr.martinez.io ]
-    -- backend 127.0.0.1:8080 weight=1
-    -- backend 127.0.0.1:8081 weight=1
+        $ hprctl add hpr.martinez.io 127.0.0.1:8080
+        $ hprctl add hpr.martinez.io 127.0.0.1:8081
+        $ hprctl show hpr.martinez.io
+        :: vhost [ hpr.martinez.io ]
+        -- backend 127.0.0.1:8080 weight=1
+        -- backend 127.0.0.1:8081 weight=1
 
-    $ hprctl list
-    :: vhost [ hpr.martinez.io ]
+        $ hprctl list
+        :: vhost [ hpr.martinez.io ]
 
 
 ### hpr.conf
