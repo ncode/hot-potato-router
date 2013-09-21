@@ -104,7 +104,7 @@ func (s *Server) handler(req *http.Request) http.Handler {
 	s.mu.RLock()
 	_, ok := s.proxy[vhost]
 	if !ok {
-		err := s.populate_proxies(vhost)
+		err := s.populate_proxies(vhost, false)
 		if err != nil {
 			hpr_utils.Log(fmt.Sprintf("%s for vhost %s", err, vhost))
 			return nil
@@ -114,7 +114,7 @@ func (s *Server) handler(req *http.Request) http.Handler {
 	return s.Next(vhost)
 }
 
-func (s *Server) populate_proxies(vhost string) (err error) {
+func (s *Server) populate_proxies(vhost string, rebalance bool) (err error) {
 	f, _ := rc.ZRange(fmt.Sprintf("hpr-backends::%s", vhost), 0, -1, true)
 	if len(f) == 0 {
 		return errors.New("Backend list is empty")
