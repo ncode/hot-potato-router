@@ -24,7 +24,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/fiorix/go-redis/redis"
-	hpr_utils "github.com/ncode/hot-potato-router/utils"
+	"github.com/ncode/hot-potato-router/utils"
 	"log"
 	"net"
 	"net/http"
@@ -37,7 +37,7 @@ import (
 )
 
 var (
-	cfg = hpr_utils.NewConfig()
+	cfg = utils.NewConfig()
 	rc  = redis.New(cfg.Options["redis"]["server_list"])
 )
 
@@ -83,7 +83,7 @@ func NewServer(probe time.Duration) (*Server, error) {
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h := s.handler(r); h != nil {
 		client := xff(r)
-		hpr_utils.Log(fmt.Sprintf("Request from: %s Url: %s", client, r.Host))
+		utils.Log(fmt.Sprintf("Request from: %s Url: %s", client, r.Host))
 		r.Header.Add("X-Forwarded-For‎", client)
 		r.Header.Add("X-Real-IP", client)
 		h.ServeHTTP(w, r)
@@ -103,7 +103,7 @@ func (s *Server) handler(req *http.Request) http.Handler {
 	if !ok {
 		err := s.populate_proxies(vhost, false)
 		if err != nil {
-			hpr_utils.Log(fmt.Sprintf("%s for vhost %s", err, vhost))
+			utils.Log(fmt.Sprintf("%s for vhost %s", err, vhost))
 			return nil
 		}
 	}
@@ -142,7 +142,7 @@ func (s *Server) Next(vhost string) http.Handler {
 	if s.backend[vhost] >= total {
 		s.backend[vhost] = 0
 	}
-	hpr_utils.Log(fmt.Sprintf(
+	utils.Log(fmt.Sprintf(
 		"Using backend: %s Url: %s", s.proxy[vhost][s.backend[vhost]].Backend, vhost))
 	return s.proxy[vhost][s.backend[vhost]].handler
 }
@@ -163,10 +163,10 @@ func (s *Server) probe_backends(probe time.Duration) {
 			removed := 0
 			for backend := range backends {
 				backend = backend - removed
-				hpr_utils.Log(fmt.Sprintf(
+				utils.Log(fmt.Sprintf(
 					"vhost: %s backends: %s", vhost, s.proxy[vhost][backend].Backend))
 				if is_dead[s.proxy[vhost][backend].Backend] == true {
-					hpr_utils.Log(fmt.Sprintf("Removing dead backend: %s", s.proxy[vhost][backend].Backend))
+					utils.Log(fmt.Sprintf("Removing dead backend: %s", s.proxy[vhost][backend].Backend))
 					s.mu.Lock()
 					s.proxy[vhost] = s.proxy[vhost][:backend+copy(s.proxy[vhost][backend:], s.proxy[vhost][backend+1:])]
 					s.mu.Unlock()
@@ -176,14 +176,14 @@ func (s *Server) probe_backends(probe time.Duration) {
 
 				_, err := client.Get(s.proxy[vhost][backend].Backend)
 				if err != nil {
-					hpr_utils.Log(fmt.Sprintf("Removing dead backend: %s with error %s", s.proxy[vhost][backend].Backend, err))
+					utils.Log(fmt.Sprintf("Removing dead backend: %s with error %s", s.proxy[vhost][backend].Backend, err))
 					is_dead[s.proxy[vhost][backend].Backend] = true
 					s.mu.Lock()
 					s.proxy[vhost] = s.proxy[vhost][:backend+copy(s.proxy[vhost][backend:], s.proxy[vhost][backend+1:])]
 					s.mu.Unlock()
 					removed++
 				} else {
-					hpr_utils.Log(fmt.Sprintf("Alive: %s", s.proxy[vhost][backend].Backend))
+					utils.Log(fmt.Sprintf("Alive: %s", s.proxy[vhost][backend].Backend))
 
 				}
 			}
