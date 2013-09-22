@@ -61,14 +61,11 @@ type Proxy struct {
 	handler http.Handler
 }
 
-func Listen(fd int, addr string) net.Listener {
+func Listen(addr string) net.Listener {
 	var l net.Listener
 	var err error
-	if fd >= 3 {
-		l, err = net.FileListener(os.NewFile(uintptr(fd), "http"))
-	} else {
-		l, err = net.Listen("tcp", addr)
-	}
+
+	l, err = net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatal(err)
 	}
