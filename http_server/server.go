@@ -130,7 +130,7 @@ func (s *Server) populate_proxies(vhost string, rebalance bool) (err error) {
 		}
 
 		for r := 1; r <= count; r++ {
-			if rebalance == true && r <= current_count {
+			if rebalance == true && r < current_count {
 				continue
 			}
 
