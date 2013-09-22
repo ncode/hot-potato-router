@@ -172,6 +172,7 @@ func (s *Server) probe_backends(probe time.Duration) {
 	for {
 		time.Sleep(probe)
 		for vhost, backends := range s.proxy {
+			fmt.Println(backends)
 			s.mu.Lock()
 			err := s.populate_proxies(vhost, true)
 			s.mu.Unlock()
@@ -205,9 +206,7 @@ func (s *Server) probe_backends(probe time.Duration) {
 					s.mu.Unlock()
 					removed++
 				} else {
-					is_dead[s.proxy[vhost][backend].Backend] = false
 					utils.Log(fmt.Sprintf("Alive: %s", s.proxy[vhost][backend].Backend))
-
 				}
 			}
 
