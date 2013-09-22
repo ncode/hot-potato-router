@@ -132,7 +132,7 @@ func (s *Server) populate_proxies(vhost string, rebalance bool) (err error) {
 		}
 		backend := fmt.Sprintf("http://%s", url)
 		for r := 1; r <= count; r++ {
-			if rebalance == true && r < s.vcount[vhost][backend] {
+			if rebalance == true && r <= s.vcount[vhost][backend] {
 				continue
 			}
 			s.proxy[vhost] = append(s.proxy[vhost], Proxy{backend, makeHandler(url)})
