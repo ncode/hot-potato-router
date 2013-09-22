@@ -188,6 +188,7 @@ func (s *Server) probe_backends(probe time.Duration) {
 					s.mu.Lock()
 					s.proxy[vhost] = s.proxy[vhost][:backend+copy(s.proxy[vhost][backend:], s.proxy[vhost][backend+1:])]
 					s.vcount[vhost][s.proxy[vhost][backend].Backend]--
+					s.backend[vhost]--
 					s.mu.Unlock()
 					removed++
 					continue
@@ -200,6 +201,7 @@ func (s *Server) probe_backends(probe time.Duration) {
 					s.mu.Lock()
 					s.proxy[vhost] = s.proxy[vhost][:backend+copy(s.proxy[vhost][backend:], s.proxy[vhost][backend+1:])]
 					s.vcount[vhost][s.proxy[vhost][backend].Backend]--
+					s.backend[vhost]--
 					s.mu.Unlock()
 					removed++
 				} else {
