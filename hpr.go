@@ -20,8 +20,8 @@ package main
 
 import (
 	"crypto/tls"
-	hpr_http_server "github.com/ncode/hot-potato-router/http_server"
-	hpr_utils "github.com/ncode/hot-potato-router/utils"
+	"github.com/ncode/hot-potato-router/http_server"
+	"github.com/ncode/hot-potato-router/utils"
 	"net/http"
 	"strconv"
 	"time"
@@ -32,25 +32,25 @@ var (
 )
 
 func main() {
-	hpr_utils.Log("Starting Hot Potato Router...")
+	utils.Log("Starting Hot Potato Router...")
 	probe_interval, _ := strconv.Atoi(cfg.Options["hpr"]["probe_interval"])
 	if probe_interval == 0 {
 		probe_interval = 10
 	}
 	s, err := hpr_http_server.NewServer(time.Duration(probe_interval) * time.Second)
-	hpr_utils.CheckPanic(err, "Unable to spawn")
+	utils.CheckPanic(err, "Unable to spawn")
 
 	if cfg.Options["hpr"]["https_addr"] != "" {
 		cert, err := tls.LoadX509KeyPair(cfg.Options["hpr"]["cert_file"], cfg.Options["hpr"]["key_file"])
-		hpr_utils.CheckPanic(err, "Unable to load certificate")
+		utils.CheckPanic(err, "Unable to load certificate")
 
 		c := &tls.Config{Certificates: []tls.Certificate{cert}}
-		l := tls.NewListener(hpr_http_server.Listen(https_fd, cfg.Options["hpr"]["https_addr"]), c)
+		l := tls.NewListener(http_server.Listen(https_fd, cfg.Options["hpr"]["https_addr"]), c)
 		go func() {
-			hpr_utils.CheckPanic(http.Serve(l, s), "Problem with https server")
+			utils.CheckPanic(http.Serve(l, s), "Problem with https server")
 		}()
 	}
 	hpr_utils.CheckPanic(
-		http.Serve(hpr_http_server.Listen(http_fd, cfg.Options["hpr"]["http_addr"]), s),
+		http.Serve(http_server.Listen(http_fd, cfg.Options["hpr"]["http_addr"]), s),
 		"Problem with http server")
 }
