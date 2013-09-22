@@ -131,10 +131,6 @@ func (s *Server) populate_proxies(vhost string) (err error) {
 			continue
 		}
 		backend := fmt.Sprintf("http://%s", url)
-		if s.vcount[vhost][backend] == count {
-			continue
-		}
-
 		for r := 1; r <= count; r++ {
 			if r <= s.vcount[vhost][backend] {
 				continue
