@@ -28,7 +28,7 @@ import (
 )
 
 var (
-	cfg = hpr_utils.NewConfig()
+	cfg = utils.NewConfig()
 )
 
 func main() {
@@ -37,7 +37,7 @@ func main() {
 	if probe_interval == 0 {
 		probe_interval = 10
 	}
-	s, err := hpr_http_server.NewServer(time.Duration(probe_interval) * time.Second)
+	s, err := http_server.NewServer(time.Duration(probe_interval) * time.Second)
 	utils.CheckPanic(err, "Unable to spawn")
 
 	if cfg.Options["hpr"]["https_addr"] != "" {
@@ -45,12 +45,12 @@ func main() {
 		utils.CheckPanic(err, "Unable to load certificate")
 
 		c := &tls.Config{Certificates: []tls.Certificate{cert}}
-		l := tls.NewListener(http_server.Listen(https_fd, cfg.Options["hpr"]["https_addr"]), c)
+		l := tls.NewListener(http_server.Listen(fg.Options["hpr"]["https_addr"]), c)
 		go func() {
 			utils.CheckPanic(http.Serve(l, s), "Problem with https server")
 		}()
 	}
-	hpr_utils.CheckPanic(
-		http.Serve(http_server.Listen(http_fd, cfg.Options["hpr"]["http_addr"]), s),
+	utils.CheckPanic(
+		http.Serve(http_server.Listen(cfg.Options["hpr"]["http_addr"]), s),
 		"Problem with http server")
 }
