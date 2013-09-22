@@ -40,9 +40,7 @@ func main() {
 	s, err := hpr_http_server.NewServer(time.Duration(probe_interval) * time.Second)
 	hpr_utils.CheckPanic(err, "Unable to spawn")
 
-	http_fd, _ := strconv.Atoi(cfg.Options["hpr"]["http_fd"])
-	https_fd, _ := strconv.Atoi(cfg.Options["hpr"]["https_fd"])
-	if https_fd >= 3 || cfg.Options["hpr"]["https_addr"] != "" {
+	if cfg.Options["hpr"]["https_addr"] != "" {
 		cert, err := tls.LoadX509KeyPair(cfg.Options["hpr"]["cert_file"], cfg.Options["hpr"]["key_file"])
 		hpr_utils.CheckPanic(err, "Unable to load certificate")
 
