@@ -142,7 +142,7 @@ func (s *Server) populate_proxies(vhost string, rebalance bool) (err error) {
 				s.vcount[vhost] = v
 			}
 			s.vcount[vhost][backend]++
-			utils.Log(fmt.Sprintf("Backend %s with %s handlers for %s", backend, s.vcount[vhost][backend], vhost))
+			utils.Log(fmt.Sprintf("Backend %s with %d handlers for %s", backend, s.vcount[vhost][backend], vhost))
 		}
 	}
 	return
