@@ -172,7 +172,9 @@ func (s *Server) probe_backends(probe time.Duration) {
 	for {
 		time.Sleep(probe)
 		for vhost, backends := range s.proxy {
+			s.mu.Lock()
 			err := s.populate_proxies(vhost, true)
+			s.mu.Unlock()
 			if err != nil {
 				utils.Log(fmt.Sprintf("Cleaned entries from vhost: %s", vhost))
 				continue
