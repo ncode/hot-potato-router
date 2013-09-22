@@ -45,11 +45,9 @@ HPR receives a connection from interwebs look for the destination on Redis and p
 
     hpr:
         http_addr: :80                 # bind address
-        http_fd:
-        https_addr:
-        https_fd:
-        cert_file:
-        key_file:
+        https_addr:                    # https_addres
+        cert_file:                     # cert file for https
+        key_file:                      # key file for https
         probe_interval: 50             # seconds between probes
         db_backend: redis              # backend type
 
