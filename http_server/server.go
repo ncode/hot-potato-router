@@ -112,6 +112,7 @@ func (s *Server) handler(req *http.Request) http.Handler {
 
 func (s *Server) populate_proxies(vhost string) (err error) {
 	s.mu.RLock()
+	defer s.mu.RUnlock()
 	f, _ := rc.ZRange(fmt.Sprintf("hpr-backends::%s", vhost), 0, -1, true)
 	if len(f) == 0 {
 		if len(s.proxy[vhost]) > 0 {
