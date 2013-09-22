@@ -86,7 +86,7 @@ Options:
 		keys, err := rc.Keys("hpr-backends::*")
 		hpr_utils.CheckPanic(err, "Unable to write on hpr database")
 		for _, k := range keys {
-			fmt.Printf(":: vhost [ %s ]\n", strings.TrimLeft(k, "hpr-backends::"))
+			fmt.Printf(":: vhost [ %s ]\n", strings.TrimPrefix(k, "hpr-backends::"))
 		}
 		return
 	}
