@@ -45,7 +45,7 @@ func main() {
 		utils.CheckPanic(err, "Unable to load certificate")
 
 		c := &tls.Config{Certificates: []tls.Certificate{cert}}
-		l := tls.NewListener(http_server.Listen(fg.Options["hpr"]["https_addr"]), c)
+		l := tls.NewListener(http_server.Listen(cfg.Options["hpr"]["https_addr"]), c)
 		go func() {
 			utils.CheckPanic(http.Serve(l, s), "Problem with https server")
 		}()
