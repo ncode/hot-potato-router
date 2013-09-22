@@ -136,6 +136,11 @@ func (s *Server) populate_proxies(vhost string, rebalance bool) (err error) {
 				continue
 			}
 			s.proxy[vhost] = append(s.proxy[vhost], Proxy{backend, makeHandler(url)})
+			v, ready := s.vcount[vhost]
+			if !ready {
+				v = make(map[string]int)
+				s.vcount[vhost] = v
+			}
 			s.vcount[vhost][backend]++
 		}
 	}
