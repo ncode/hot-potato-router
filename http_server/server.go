@@ -180,10 +180,6 @@ func (s *Server) probe_backends(probe time.Duration) {
 			is_dead := make(map[string]bool)
 			removed := 0
 			for backend := range backends {
-				if is_dead[s.proxy[vhost][backend].Backend] == false {
-					continue
-				}
-
 				backend = backend - removed
 				utils.Log(fmt.Sprintf(
 					"vhost: %s backends: %s", vhost, s.proxy[vhost][backend].Backend))
