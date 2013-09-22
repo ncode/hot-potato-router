@@ -52,6 +52,7 @@ type Server struct {
 	mu      sync.RWMutex
 	proxy   map[string][]Proxy
 	backend map[string]int
+	vcount  map[string]map[string]int
 }
 
 type Proxy struct {
@@ -75,6 +76,7 @@ func NewServer(probe time.Duration) (*Server, error) {
 	s := new(Server)
 	s.proxy = make(map[string][]Proxy)
 	s.backend = make(map[string]int)
+	s.vcount = make(map[string]map[string]int)
 	go s.probe_backends(probe)
 	return s, nil
 }
@@ -111,12 +113,12 @@ func (s *Server) handler(req *http.Request) http.Handler {
 }
 
 func (s *Server) populate_proxies(vhost string, rebalance bool) (err error) {
-	var current_count int
 	f, _ := rc.ZRange(fmt.Sprintf("hpr-backends::%s", vhost), 0, -1, true)
 	if len(f) == 0 {
-		current_count = len(s.proxy[vhost])
-		if current_count > 0 {
+		if len(s.proxy[vhost]) > 0 {
 			delete(s.proxy, vhost)
+			delete(s.backend, vhost)
+			delete(s.vcount, vhost)
 		}
 		return errors.New("Backend list is empty")
 	}
@@ -128,14 +130,13 @@ func (s *Server) populate_proxies(vhost string, rebalance bool) (err error) {
 			url = be
 			continue
 		}
-
+		backend := fmt.Sprintf("http://%s", url)
 		for r := 1; r <= count; r++ {
-			if rebalance == true && r < current_count {
+			if rebalance == true && r < s.vcount[vhost][backend] {
 				continue
 			}
-
-			s.proxy[vhost] = append(s.proxy[vhost],
-				Proxy{fmt.Sprintf("http://%s", url), makeHandler(url)})
+			s.proxy[vhost] = append(s.proxy[vhost], Proxy{backend, makeHandler(url)})
+			s.vcount[vhost][backend]++
 		}
 	}
 	return
@@ -180,6 +181,7 @@ func (s *Server) probe_backends(probe time.Duration) {
 					utils.Log(fmt.Sprintf("Removing dead backend: %s", s.proxy[vhost][backend].Backend))
 					s.mu.Lock()
 					s.proxy[vhost] = s.proxy[vhost][:backend+copy(s.proxy[vhost][backend:], s.proxy[vhost][backend+1:])]
+					s.vcount[vhost][s.proxy[vhost][backend].Backend]--
 					s.mu.Unlock()
 					removed++
 					continue
@@ -191,6 +193,7 @@ func (s *Server) probe_backends(probe time.Duration) {
 					is_dead[s.proxy[vhost][backend].Backend] = true
 					s.mu.Lock()
 					s.proxy[vhost] = s.proxy[vhost][:backend+copy(s.proxy[vhost][backend:], s.proxy[vhost][backend+1:])]
+					s.vcount[vhost][s.proxy[vhost][backend].Backend]--
 					s.mu.Unlock()
 					removed++
 				} else {
