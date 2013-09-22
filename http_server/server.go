@@ -99,20 +99,19 @@ func (s *Server) handler(req *http.Request) http.Handler {
 		vhost = vhost[:i]
 	}
 
-	s.mu.RLock()
 	_, ok := s.proxy[vhost]
 	if !ok {
-		err := s.populate_proxies(vhost, false)
+		err := s.populate_proxies(vhost)
 		if err != nil {
 			utils.Log(fmt.Sprintf("%s for vhost %s", err, vhost))
 			return nil
 		}
 	}
-	s.mu.RUnlock()
 	return s.Next(vhost)
 }
 
-func (s *Server) populate_proxies(vhost string, rebalance bool) (err error) {
+func (s *Server) populate_proxies(vhost string) (err error) {
+	s.mu.RLock()
 	f, _ := rc.ZRange(fmt.Sprintf("hpr-backends::%s", vhost), 0, -1, true)
 	if len(f) == 0 {
 		if len(s.proxy[vhost]) > 0 {
@@ -132,7 +131,7 @@ func (s *Server) populate_proxies(vhost string, rebalance bool) (err error) {
 		}
 		backend := fmt.Sprintf("http://%s", url)
 		for r := 1; r <= count; r++ {
-			if rebalance == true && r <= s.vcount[vhost][backend] {
+			if r <= s.vcount[vhost][backend] {
 				continue
 			}
 			s.proxy[vhost] = append(s.proxy[vhost], Proxy{backend, makeHandler(url)})
@@ -173,9 +172,7 @@ func (s *Server) probe_backends(probe time.Duration) {
 		time.Sleep(probe)
 		for vhost, backends := range s.proxy {
 			fmt.Println(backends)
-			s.mu.Lock()
-			err := s.populate_proxies(vhost, true)
-			s.mu.Unlock()
+			err := s.populate_proxies(vhost)
 			if err != nil {
 				utils.Log(fmt.Sprintf("Cleaned entries from vhost: %s", vhost))
 				continue
