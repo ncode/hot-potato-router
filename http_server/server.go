@@ -111,8 +111,13 @@ func (s *Server) handler(req *http.Request) http.Handler {
 }
 
 func (s *Server) populate_proxies(vhost string, rebalance bool) (err error) {
+	var current_count int
 	f, _ := rc.ZRange(fmt.Sprintf("hpr-backends::%s", vhost), 0, -1, true)
 	if len(f) == 0 {
+		current_count = len(s.proxy[vhost])
+		if current_count > 0 {
+			delete(s.proxy, vhost)
+		}
 		return errors.New("Backend list is empty")
 	}
 
@@ -125,6 +130,10 @@ func (s *Server) populate_proxies(vhost string, rebalance bool) (err error) {
 		}
 
 		for r := 1; r <= count; r++ {
+			if rebalance == true && r <= current_count {
+				continue
+			}
+
 			s.proxy[vhost] = append(s.proxy[vhost],
 				Proxy{fmt.Sprintf("http://%s", url), makeHandler(url)})
 		}
@@ -155,9 +164,12 @@ func (s *Server) probe_backends(probe time.Duration) {
 
 	for {
 		time.Sleep(probe)
-
 		for vhost, backends := range s.proxy {
-			// err := s.populate_proxies(vhost)
+			err := s.populate_proxies(vhost, true)
+			if err != nil {
+				utils.Log(fmt.Sprintf("Cleaned entries from vhost: %s", vhost))
+				continue
+			}
 			is_dead := make(map[string]bool)
 			removed := 0
 			for backend := range backends {
