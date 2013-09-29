@@ -1,5 +1,6 @@
 # HPR - Hot Potato Router
-###### dynamic http reverse proxy made easy 
+###### dynamic reverse prox
+
 ## How it works?
 
 HPR receives a connection from interwebs, looks for backends on Redis for a given vhost and proxy the connection among all backends.
