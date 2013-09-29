@@ -2,13 +2,41 @@
 ###### dynamic http reverse proxy made easy 
 ## How it works?
 
-HPR receives a connection from interwebs look for the destination on Redis and proxy the connection for one or more instances, to avoid a dead instance serving content we have a goroutine checking and updating the instance state on redis.
+HPR receives a connection from interwebs, looks for backends on Redis for a given vhost and proxy the connection among all backends.
 
 <img src="https://raw.github.com/ncode/hot-potato-router/master/hpr.png">
 
+## Config:
+### hpr.conf
 
-## Usage:
-###  hprctl
+    hpr:
+      http_addr: :80                 # bind address
+      https_addr:                    # https_addres
+      cert_file:                     # cert file for https
+      key_file:                      # key file for https
+      probe_interval: 50             # seconds between probes
+      db_backend: redis              # backend type
+
+    redis:
+      server_list: 127.0.0.1:6379    # list of redis servers to connect
+
+## Instalation:
+### Building
+
+    $ git clone https://github.com/ncode/hot-potato-router.git
+    $ cd hot-potato-router
+    $ go get -v .
+    $ make build
+
+### Packaging on Debian and Ubuntu
+
+    $ apt-get install golang
+    $ git clone https://github.com/ncode/hot-potato-router.git
+    $ cd gogix hot-potato-router
+    $ dpkg-buildpackage -us -uc -rfakeroot
+
+## Cli:
+### hprctl
 
     $ hprctl -h
     Hot Potato Router Control
@@ -40,20 +68,6 @@ HPR receives a connection from interwebs look for the destination on Redis and p
     $ hprctl list
     :: vhost [ hpr.martinez.io ]
 
-
-### hpr.conf
-
-    hpr:
-        http_addr: :80                 # bind address
-        https_addr:                    # https_addres
-        cert_file:                     # cert file for https
-        key_file:                      # key file for https
-        probe_interval: 50             # seconds between probes
-        db_backend: redis              # backend type
-
-    redis:
-        server_list: 127.0.0.1:6379    # list of redis servers to connect
-
 ## Depends:
 * go-redis - https://github.com/fiorix/go-redis.git
-* gdocopt  - github.com/docopt/docopt.go
+* gdocopt  - https://github.com/docopt/docopt.go
