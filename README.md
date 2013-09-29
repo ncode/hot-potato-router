@@ -27,6 +27,7 @@ HPR receives a connection from interwebs, looks for backends on Redis for a give
     $ cd hot-potato-router
     $ go get -v .
     $ make build
+    $ hpr
 
 ### Packaging on Debian and Ubuntu
 
@@ -34,6 +35,7 @@ HPR receives a connection from interwebs, looks for backends on Redis for a give
     $ git clone https://github.com/ncode/hot-potato-router.git
     $ cd gogix hot-potato-router
     $ dpkg-buildpackage -us -uc -rfakeroot
+    $ /etc/init.d/hot-potato-router start
 
 ## Cli:
 ### hprctl
