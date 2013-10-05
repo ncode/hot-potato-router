@@ -73,3 +73,8 @@ HPR receives a connection from interwebs, looks for http backends on Redis for a
 ## Depends:
 * go-redis - https://github.com/fiorix/go-redis.git
 * gdocopt  - https://github.com/docopt/docopt.go
+
+## Todo:
+* Improve the database support adding more backends
+* Add more load balancing algorithms
+* Implement the api on hpr and stop calling direct the database
