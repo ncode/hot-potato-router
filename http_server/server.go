@@ -135,6 +135,7 @@ func (s *Server) populate_proxies(vhost string) (err error) {
 			if r <= s.vcount[vhost][backend] {
 				continue
 			}
+			fmt.Println("lala")
 			s.proxy[vhost] = append(s.proxy[vhost], Proxy{backend, makeHandler(url)})
 			v, ready := s.vcount[vhost]
 			if !ready {
@@ -206,9 +207,9 @@ func (s *Server) probe_backends(probe time.Duration) {
 				} else {
 					utils.Log(fmt.Sprintf("Alive: %s", s.proxy[vhost][backend].Backend))
 				}
-				transport.CloseIdleConnections()
 			}
 		}
+		transport.CloseIdleConnections()
 	}
 }
 
