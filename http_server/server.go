@@ -88,6 +88,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		r.Header.Add("X-Forwarded-For‎", client)
 		r.Header.Add("X-Real-IP", client)
 		h.ServeHTTP(w, r)
+		// probe should act here
 		fmt.Println(w.Header())
 		return
 	}
