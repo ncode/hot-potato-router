@@ -88,7 +88,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		r.Header.Add("X-Forwarded-For‎", client)
 		r.Header.Add("X-Real-IP", client)
 		h.ServeHTTP(w, r)
-		fmt.Println("done")
+		fmt.Println(w.Header())
 		return
 	}
 	http.Error(w, "Not found.", http.StatusNotFound)
@@ -136,9 +136,7 @@ func (s *Server) populate_proxies(vhost string) (err error) {
 			if r <= s.vcount[vhost][backend] {
 				continue
 			}
-			fmt.Println("lala")
 			s.proxy[vhost] = append(s.proxy[vhost], Proxy{backend, makeHandler(url)})
-			fmt.Println("lili")
 			v, ready := s.vcount[vhost]
 			if !ready {
 				v = make(map[string]int)
@@ -222,7 +220,6 @@ func dialTimeout(network, addr string) (net.Conn, error) {
 
 func makeHandler(f string) http.Handler {
 	if f != "" {
-		fmt.Println("lelele")
 		return &httputil.ReverseProxy{
 			Director: func(req *http.Request) {
 				req.URL.Scheme = "http"
