@@ -194,7 +194,8 @@ func (s *Server) probe_backends(probe time.Duration) {
 					continue
 				}
 
-				_, err := client.Get(s.proxy[vhost][backend].Backend)
+				req, err := client.Get(s.proxy[vhost][backend].Backend)
+				defer resp.Body.Close()
 				if err != nil {
 					utils.Log(fmt.Sprintf("Removing dead backend: %s with error %s", s.proxy[vhost][backend].Backend, err))
 					is_dead[s.proxy[vhost][backend].Backend] = true
