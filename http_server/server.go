@@ -77,7 +77,7 @@ func NewServer(probe time.Duration) (*Server, error) {
 	s.proxy = make(map[string][]Proxy)
 	s.backend = make(map[string]int)
 	s.vcount = make(map[string]map[string]int)
-	go s.probe_backends(probe)
+	// go s.probe_backends(probe)
 	return s, nil
 }
 
@@ -88,6 +88,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		r.Header.Add("X-Forwarded-For‎", client)
 		r.Header.Add("X-Real-IP", client)
 		h.ServeHTTP(w, r)
+		fmt.Println("done")
 		return
 	}
 	http.Error(w, "Not found.", http.StatusNotFound)
