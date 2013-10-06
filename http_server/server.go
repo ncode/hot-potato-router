@@ -206,11 +206,9 @@ func (s *Server) probe_backends(probe time.Duration) {
 				} else {
 					utils.Log(fmt.Sprintf("Alive: %s", s.proxy[vhost][backend].Backend))
 				}
-				transport.CancelRequest(req)
+				transport.CloseIdleConnections()
 			}
-
 		}
-
 	}
 }
 
