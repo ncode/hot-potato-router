@@ -138,6 +138,7 @@ func (s *Server) populate_proxies(vhost string) (err error) {
 			}
 			fmt.Println("lala")
 			s.proxy[vhost] = append(s.proxy[vhost], Proxy{backend, makeHandler(url)})
+			fmt.Println("lili")
 			v, ready := s.vcount[vhost]
 			if !ready {
 				v = make(map[string]int)
@@ -221,6 +222,7 @@ func dialTimeout(network, addr string) (net.Conn, error) {
 
 func makeHandler(f string) http.Handler {
 	if f != "" {
+		fmt.Println("lelele")
 		return &httputil.ReverseProxy{
 			Director: func(req *http.Request) {
 				req.URL.Scheme = "http"
