@@ -19,8 +19,8 @@
 package utils
 
 import (
+	"github.com/soundcloud/goyaml"
 	"io/ioutil"
-	"launchpad.net/goyaml"
 	"os"
 	"strings"
 )
